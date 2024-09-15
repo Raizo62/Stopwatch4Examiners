@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch4Examiners</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            transition: background-color 0.5s ease;
+        }
+        .container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .counter {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        .cadre {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        button:focus {
+            outline: none;
+        }
+        input {
+            width: 60px;
+            padding: 5px;
+            margin: 5px;
+            font-size: 16px;
+            text-align: center;
+        }
+        @keyframes flashOrange {
+            0%, 100% { background-color: #f0f0f0; }
+            50% { background-color: orange; }
+        }
+        @keyframes flashRed {
+            0%, 100% { background-color: #f0f0f0; }
+            50% { background-color: red; }
+        }
+        .flashing-orange {
+            animation: flashOrange 1s infinite;
+        }
+        .flashing-red {
+            animation: flashRed 1s infinite;
+        }
+        .config-label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .sub-config {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #fafafa;
+        }
+        .sub-config h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="soutenance" class="cadre">
+            <h3>Soutenance</h3>
+            <div id="soutenanceCompteur" class="container">
+                <div class="counter" id="soutenanceChrono">00:00:00</div>
+                <button id="soutenanceBoutonStart">Start</button>
+                <button id="soutenanceBoutonPause" disabled>Pause</button>
+                <button id="soutenanceBoutonStop">Terminer</button>
+            </div>
+        </div>
+        <div id="questions" class="cadre">
+            <h3>Questions</h3>
+            <div id="questionsCompteur" class="container">
+                <div class="counter" id="questionsChrono">00:00:00</div>
+                <button id="questionsBoutonPause">Pause</button>
+                <button id="questionsBoutonTerminer">Terminer</button>
+            </div>
+        </div>
+        <div id="config" class="cadre">
+            <h3>Configurations</h3>
+            <div class="sub-config" id="soutenanceConfig">
+                <h4>Soutenance</h4>
+                <label class="config-label">Durée (min) : 
+                <input type="number" id="soutenanceDuree" value="15" min="1">
+                </label>
+                <label class="config-label">Marge (min) : 
+                <input type="number" id="soutenanceMargeAutorisee" value="2" min="0">
+                </label>
+            </div>
+            <div class="sub-config" id="questionsConfig">
+                <h4>Questions</h4>
+                <label class="config-label">Durée (min) : 
+                <input type="number" id="questionDuree" value="10" min="0">
+                </label>
+                <label class="config-label">Marge (min) : 
+                <input type="number" id="questionMargeAutorisee" value="2" min="0">
+                </label>
+            </div>
+        </div>
+    </div>
+    <script>
+      let questionsIntervalId;    // Variable pour suivre l'intervalle du chronomètre des questions
+      let isPausedQuestions = false;
+      let counterQuestions = 0;
+      let wakeLock = null;
+
+      async function requestWakeLock() {
+          try {
+              wakeLock = await navigator.wakeLock.request('screen');
+              wakeLock.addEventListener('release', () => {
+                  console.log('Wake Lock was released');
+              });
+          } catch (err) {
+              console.error(`${err.name}, ${err.message}`);
+          }
+      }
+
+      async function releaseWakeLock() {
+          if (wakeLock !== null) {
+              await wakeLock.release();
+              wakeLock = null;
+              console.log('Screen wake lock released');
+          }
+      }
+
+      function createCounter(counterId, counterDisplayId, startBtnId, pauseBtnId, stopBtnId, orangeThresholdId, redThresholdId, onStopCallback) {
+          let counter = 0;
+          let intervalId;
+          let isPaused = false;
+          let hasStarted = false;
+
+          function formatTime(hours, minutes, seconds) {
+              return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+          }
+
+          function startCounter() {
+              intervalId = setInterval(() => {
+                  if (!isPaused) {
+                      counter++;
+                      const hours = Math.floor(counter / 3600);
+                      const minutes = Math.floor((counter - hours * 3600) / 60);
+                      const seconds = counter % 60;
+
+                      // Affichage formaté
+                      document.getElementById(counterDisplayId).textContent = formatTime(hours, minutes, seconds);
+
+                      // Récupération des seuils personnalisés
+                      const orangeThreshold = document.getElementById(orangeThresholdId).value * 60;
+                      const redThreshold = orangeThreshold + document.getElementById(redThresholdId).value * 60;
+
+                      // Vérification du seuil orange
+                      if (counter === orangeThreshold) {
+                          document.body.classList.remove("flashing-red");
+                          document.body.classList.add("flashing-orange");
+                      }
+
+                      // Vérification du seuil rouge
+                      if (counter === redThreshold) {
+                          document.body.classList.remove("flashing-orange");
+                          document.body.classList.add("flashing-red");
+                      }
+                  }
+              }, 1000);
+          }
+
+          document.getElementById(startBtnId).addEventListener('click', () => {
+              if (!hasStarted) {
+                  hasStarted = true;
+                  startCounter();
+                  document.getElementById(startBtnId).textContent = "Reinit";
+                  document.getElementById(pauseBtnId).disabled = false; // Activer le bouton Pause après le démarrage
+                  requestWakeLock(); // Demander le verrouillage de l'écran
+              } else {
+                  // Réinitialiser le chrono
+                  counter = 0;
+                  document.getElementById(counterDisplayId).textContent = "00:00:00";
+                  document.body.classList.remove("flashing-orange");
+                  document.body.classList.remove("flashing-red");
+
+                  // Arrêter et réinitialiser le chrono des questions
+                  if (questionsIntervalId) {
+                      clearInterval(questionsIntervalId);
+                      document.getElementById("questionsChrono").textContent = "00:00:00";
+                      document.body.classList.remove("flashing-orange");
+                      document.body.classList.remove("flashing-red");
+                  }
+
+                  // Réinitialiser le chronomètre et le redémarrer
+                  if (intervalId) clearInterval(intervalId);
+                  startCounter();
+              }
+          });
+
+          document.getElementById(pauseBtnId).addEventListener('click', () => {
+              isPaused = !isPaused;
+              document.getElementById(pauseBtnId).textContent = isPaused ? "Continuer" : "Pause";
+          });
+
+          document.getElementById(stopBtnId).addEventListener('click', () => {
+              clearInterval(intervalId);
+              document.body.classList.remove("flashing-orange");
+              document.body.classList.remove("flashing-red");
+
+              if (onStopCallback) {
+                  onStopCallback();
+              }
+              // Ne pas appeler releaseWakeLock ici
+          });
+      }
+
+      function soutenanceStartCompteur() {
+          createCounter("soutenanceCompteur", "soutenanceChrono", "soutenanceBoutonStart", "soutenanceBoutonPause", "soutenanceBoutonStop", "soutenanceDuree", "soutenanceMargeAutorisee", () => {
+              // Quand on termine la soutenance, on démarre le compteur des questions
+              // Le compteur des questions est déjà visible
+              startQuestionsCounter(); // Démarrer le chronomètre des questions ici
+          });
+      }
+
+      function startQuestionsCounter() {
+          counterQuestions = 0;    // Initialiser le compteur des questions
+          isPausedQuestions = false;    // Initialiser l'état de pause des questions
+
+          questionsIntervalId = setInterval(() => {
+              if (!isPausedQuestions) {
+                  counterQuestions++;
+                  const hours = Math.floor(counterQuestions / 3600);
+                  const minutes = Math.floor((counterQuestions - hours * 3600) / 60);
+                  const seconds = counterQuestions % 60;
+
+                  document.getElementById("questionsChrono").textContent = formatTime(hours, minutes, seconds);
+
+                  const orangeThreshold = document.getElementById("questionDuree").value * 60;
+                  const redThreshold = orangeThreshold + document.getElementById("questionMargeAutorisee").value * 60;
+
+                  if (counterQuestions === orangeThreshold) {
+                      document.body.classList.remove("flashing-red");
+                      document.body.classList.add("flashing-orange");
+                  }
+
+                  if (counterQuestions === redThreshold) {
+                      document.body.classList.remove("flashing-orange");
+                      document.body.classList.add("flashing-red");
+                  }
+              }
+          }, 1000);
+
+          document.getElementById("questionsBoutonPause").addEventListener('click', () => {
+              isPausedQuestions = !isPausedQuestions;
+              document.getElementById("questionsBoutonPause").textContent = isPausedQuestions ? "Continuer" : "Pause";
+          });
+
+          document.getElementById("questionsBoutonTerminer").addEventListener('click', () => {
+              clearInterval(questionsIntervalId);
+              document.body.classList.remove("flashing-orange");
+              document.body.classList.remove("flashing-red");
+              // Enlever la ligne suivante pour ne pas réinitialiser le chronomètre
+              // document.getElementById("questionsChrono").textContent = "00:00:00";
+              releaseWakeLock(); // Libérer le verrouillage de l'écran
+          });
+      }
+
+      function formatTime(hours, minutes, seconds) {
+          return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }
+
+      // Initialisation du chronomètre de soutenance dès le chargement de la page
+      soutenanceStartCompteur();
+
+    </script>
+</body>
+</html>
