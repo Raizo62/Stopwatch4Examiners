@@ -142,7 +142,8 @@
       }
 
       function createCounter(counterId, counterDisplayId, startBtnId, pauseBtnId, stopBtnId, orangeThresholdId, redThresholdId, onStopCallback) {
-          let counter = 0;
+          let timeBegin = performance.now();
+          let timeAlreadyUP = 0;
           let intervalId;
           let isPaused = false;
           let hasStarted = false;
@@ -154,7 +155,8 @@
           function startCounter() {
               intervalId = setInterval(() => {
                   if (!isPaused) {
-                      counter++;
+                      const timeEnd = performance.now();
+                      const counter = timeAlreadyUP + Math.floor((timeEnd-timeBegin)/1000);
                       const hours = Math.floor(counter / 3600);
                       const minutes = Math.floor((counter - hours * 3600) / 60);
                       const seconds = counter % 60;
@@ -190,7 +192,8 @@
                   requestWakeLock(); // Demander le verrouillage de l'écran
               } else {
                   // Réinitialiser le chrono
-                  counter = 0;
+                  timeBegin = performance.now();
+                  timeAlreadyUP = 0;
                   document.getElementById(counterDisplayId).textContent = "00:00:00";
                   document.body.classList.remove("flashing-orange");
                   document.body.classList.remove("flashing-red");
@@ -210,8 +213,19 @@
           });
 
           document.getElementById(pauseBtnId).addEventListener('click', () => {
-              isPaused = !isPaused;
-              document.getElementById(pauseBtnId).textContent = isPaused ? "Continuer" : "Pause";
+              if( ! isPaused )
+              { // The counter will be stopped
+                const timeEnd = performance.now();
+                timeAlreadyUP = timeAlreadyUP + Math.floor((timeEnd-timeBegin)/1000);
+                isPaused = true;
+                document.getElementById(pauseBtnId).textContent = "Continuer";
+              }
+              else
+              { // The counter will be restarted
+                timeBegin = performance.now();
+                isPaused = false;
+                document.getElementById(pauseBtnId).textContent = "Pause";
+              }
           });
 
           document.getElementById(stopBtnId).addEventListener('click', () => {
@@ -235,12 +249,14 @@
       }
 
       function startQuestionsCounter() {
-          counterQuestions = 0;    // Initialiser le compteur des questions
+          let timeBegin = performance.now();
+          let timeAlreadyUP = 0;
           isPausedQuestions = false;    // Initialiser l'état de pause des questions
 
           questionsIntervalId = setInterval(() => {
               if (!isPausedQuestions) {
-                  counterQuestions++;
+                  const timeEnd = performance.now();
+                  const counterQuestions=timeAlreadyUP + Math.floor((timeEnd-timeBegin)/1000);
                   const hours = Math.floor(counterQuestions / 3600);
                   const minutes = Math.floor((counterQuestions - hours * 3600) / 60);
                   const seconds = counterQuestions % 60;
@@ -263,8 +279,19 @@
           }, 1000);
 
           document.getElementById("questionsBoutonPause").addEventListener('click', () => {
-              isPausedQuestions = !isPausedQuestions;
-              document.getElementById("questionsBoutonPause").textContent = isPausedQuestions ? "Continuer" : "Pause";
+              if( ! isPausedQuestions )
+              { // The counter will be stopped
+                  const timeEnd = performance.now();
+                  timeAlreadyUP = timeAlreadyUP + Math.floor((timeEnd-timeBegin)/1000);
+                  isPausedQuestions = true;
+                  document.getElementById("questionsBoutonPause").textContent = "Continuer";
+              }
+              else
+              { // The counter will be restarted
+                  timeBegin = performance.now();
+                  isPausedQuestions = false;
+                  document.getElementById("questionsBoutonPause").textContent = "Pause";
+              }
           });
 
           document.getElementById("questionsBoutonTerminer").addEventListener('click', () => {
