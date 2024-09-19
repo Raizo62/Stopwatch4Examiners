@@ -83,7 +83,7 @@
                 <div class="counter" id="soutenanceChrono">00:00:00</div>
                 <button id="soutenanceBoutonStart">Start</button>
                 <button id="soutenanceBoutonPause" disabled>Pause</button>
-                <button id="soutenanceBoutonStop">Terminer</button>
+                <button id="soutenanceBoutonQuestions">Questions</button>
             </div>
         </div>
         <div id="questions" class="cadre">
@@ -242,7 +242,7 @@
       }
 
       function soutenanceStartCompteur() {
-          createCounter("soutenanceCompteur", "soutenanceChrono", "soutenanceBoutonStart", "soutenanceBoutonPause", "soutenanceBoutonStop", "soutenanceDuree", "soutenanceMargeAutorisee", () => {
+          createCounter("soutenanceCompteur", "soutenanceChrono", "soutenanceBoutonStart", "soutenanceBoutonPause", "soutenanceBoutonQuestions", "soutenanceDuree", "soutenanceMargeAutorisee", () => {
               // Quand on termine la soutenance, on démarre le compteur des questions
               // Le compteur des questions est déjà visible
               startQuestionsCounter(); // Démarrer le chronomètre des questions ici
