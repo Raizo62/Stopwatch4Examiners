@@ -142,7 +142,7 @@
       }
 
       function createCounter(counterId, counterDisplayId, startBtnId, pauseBtnId, stopBtnId, orangeThresholdId, redThresholdId, onStopCallback) {
-          let timeBegin = performance.now();
+          let timeBegin = 0;
           let timeAlreadyUP = 0;
           let intervalId;
           let isPaused = false;
@@ -186,6 +186,7 @@
           document.getElementById(startBtnId).addEventListener('click', () => {
               if (!hasStarted) {
                   hasStarted = true;
+                  timeBegin = performance.now();
                   startCounter();
                   document.getElementById(startBtnId).textContent = "Reinit";
                   document.getElementById(pauseBtnId).disabled = false; // Activer le bouton Pause après le démarrage
