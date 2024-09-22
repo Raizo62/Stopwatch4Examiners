@@ -83,15 +83,15 @@
                 <div class="counter" id="soutenanceChrono">00:00:00</div>
                 <button id="soutenanceBoutonStart">Start</button>
                 <button id="soutenanceBoutonPause" disabled>Pause</button>
-                <button id="soutenanceBoutonQuestions">Questions</button>
+                <button id="soutenanceBoutonQuestions" disabled>Questions</button>
             </div>
         </div>
         <div id="questions" class="cadre">
             <h3>Questions</h3>
             <div id="questionsCompteur" class="container">
                 <div class="counter" id="questionsChrono">00:00:00</div>
-                <button id="questionsBoutonPause">Pause</button>
-                <button id="questionsBoutonTerminer">Terminer</button>
+                <button id="questionsBoutonPause" disabled>Pause</button>
+                <button id="questionsBoutonTerminer"disabled>Terminer</button>
             </div>
         </div>
         <div id="config" class="cadre">
@@ -139,6 +139,14 @@
               wakeLock = null;
               console.log('Screen wake lock released');
           }
+      }
+
+      function unlockButton(buttonSoutenanceStart, buttonSoutenancePause, buttonSoutenanceQuestions,   buttonQuestionsPause, buttonQuestionsTerminer) {
+          document.getElementById("soutenanceBoutonStart").disabled = ! buttonSoutenanceStart;
+          document.getElementById("soutenanceBoutonPause").disabled = ! buttonSoutenancePause;
+          document.getElementById("soutenanceBoutonQuestions").disabled = ! buttonSoutenanceQuestions;
+          document.getElementById("questionsBoutonPause").disabled = ! buttonQuestionsPause;
+          document.getElementById("questionsBoutonTerminer").disabled = ! buttonQuestionsTerminer;
       }
 
       function createCounter(counterId, counterDisplayId, startBtnId, pauseBtnId, stopBtnId, orangeThresholdId, redThresholdId, onStopCallback) {
@@ -189,7 +197,7 @@
                   timeBegin = performance.now();
                   startCounter();
                   document.getElementById(startBtnId).textContent = "Reinit";
-                  document.getElementById(pauseBtnId).disabled = false; // Activer le bouton Pause après le démarrage
+                  unlockButton(true, true, true,   false, false);
                   requestWakeLock(); // Demander le verrouillage de l'écran
               } else {
                   // Réinitialiser le chrono
@@ -198,6 +206,7 @@
                   document.getElementById(counterDisplayId).textContent = "00:00:00";
                   document.body.classList.remove("flashing-orange");
                   document.body.classList.remove("flashing-red");
+                  unlockButton(true, true, true,   false, false);
 
                   // Arrêter et réinitialiser le chrono des questions
                   if (questionsIntervalId) {
@@ -220,12 +229,14 @@
                 timeAlreadyUP = timeAlreadyUP + Math.floor((timeEnd-timeBegin)/1000);
                 isPaused = true;
                 document.getElementById(pauseBtnId).textContent = "Continuer";
+                unlockButton(true, true, true,   false, false);
               }
               else
               { // The counter will be restarted
                 timeBegin = performance.now();
                 isPaused = false;
                 document.getElementById(pauseBtnId).textContent = "Pause";
+                unlockButton(true, true, true,   false, false);
               }
           });
 
@@ -245,6 +256,7 @@
           createCounter("soutenanceCompteur", "soutenanceChrono", "soutenanceBoutonStart", "soutenanceBoutonPause", "soutenanceBoutonQuestions", "soutenanceDuree", "soutenanceMargeAutorisee", () => {
               // Quand on termine la soutenance, on démarre le compteur des questions
               // Le compteur des questions est déjà visible
+              unlockButton(false, false, false,   true, true);
               startQuestionsCounter(); // Démarrer le chronomètre des questions ici
           });
       }
@@ -286,12 +298,14 @@
                   timeAlreadyUP = timeAlreadyUP + Math.floor((timeEnd-timeBegin)/1000);
                   isPausedQuestions = true;
                   document.getElementById("questionsBoutonPause").textContent = "Continuer";
+                  unlockButton(false, false, false,   true, true);
               }
               else
               { // The counter will be restarted
                   timeBegin = performance.now();
                   isPausedQuestions = false;
                   document.getElementById("questionsBoutonPause").textContent = "Pause";
+                  unlockButton(false, false, false,   true, true);
               }
           });
 
@@ -302,6 +316,7 @@
               // Enlever la ligne suivante pour ne pas réinitialiser le chronomètre
               // document.getElementById("questionsChrono").textContent = "00:00:00";
               releaseWakeLock(); // Libérer le verrouillage de l'écran
+              unlockButton(true, false, false,   false, false);
           });
       }
 
