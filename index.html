@@ -176,7 +176,7 @@
           }
         }
 
-      function createCounter(counterId, counterDisplayId, startBtnId, pauseBtnId, stopBtnId, orangeThresholdId, redThresholdId, onStopCallback) {
+      function createCounter(counterId, counterDisplayId, startBtnId, pauseBtnId, stopBtnId, alarmId, thresholdId, onStopCallback) {
           let timeBegin = 0;
           let timeAlreadyUP = 0;
           let intervalId;
@@ -193,7 +193,7 @@
                       updateChrono(counterDisplayId, counter);
 
                       // Gestion des alarmes
-                      toggleFlashing(counter, orangeThresholdId, redThresholdId);
+                      toggleFlashing(counter, alarmId, thresholdId);
                   }
               }, 1000);
           }
