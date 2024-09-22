@@ -261,11 +261,11 @@
               // Quand on termine la soutenance, on démarre le compteur des questions
               // Le compteur des questions est déjà visible
               unlockButton(false, false, false,   true, true);
-              startQuestionsCounter(); // Démarrer le chronomètre des questions ici
+              questionsStartCompteur(); // Démarrer le chronomètre des questions ici
           });
       }
 
-      function startQuestionsCounter() {
+      function questionsStartCompteur() {
           let timeBegin = performance.now();
           let timeAlreadyUP = 0;
           isPausedQuestions = false;    // Initialiser l'état de pause des questions
