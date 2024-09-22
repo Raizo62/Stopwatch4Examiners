@@ -160,6 +160,22 @@
           document.getElementById(displayId).textContent = formatTime(seconds);
       }
 
+      function disableFlashing() {
+          document.body.classList.remove("flashing-orange", "flashing-red");
+      }
+
+      function toggleFlashing(counter, alarmId, thresholdId) {
+          const alarmSecond = document.getElementById(alarmId).value * 60;
+          const redAlarmSecond = alarmSecond + document.getElementById(thresholdId).value * 60;
+          disableFlashing();
+
+          if (counter >= redAlarmSecond) {
+              document.body.classList.add("flashing-red");
+          } else if (counter >= alarmSecond) {
+              document.body.classList.add("flashing-orange");
+          }
+        }
+
       function createCounter(counterId, counterDisplayId, startBtnId, pauseBtnId, stopBtnId, orangeThresholdId, redThresholdId, onStopCallback) {
           let timeBegin = 0;
           let timeAlreadyUP = 0;
@@ -176,21 +192,8 @@
                       // Affichage formaté
                       updateChrono(counterDisplayId, counter);
 
-                      // Récupération des seuils personnalisés
-                      const orangeThreshold = document.getElementById(orangeThresholdId).value * 60;
-                      const redThreshold = orangeThreshold + document.getElementById(redThresholdId).value * 60;
-
-                      // Vérification du seuil orange
-                      if (counter === orangeThreshold) {
-                          document.body.classList.remove("flashing-red");
-                          document.body.classList.add("flashing-orange");
-                      }
-
-                      // Vérification du seuil rouge
-                      if (counter === redThreshold) {
-                          document.body.classList.remove("flashing-orange");
-                          document.body.classList.add("flashing-red");
-                      }
+                      // Gestion des alarmes
+                      toggleFlashing(counter, orangeThresholdId, redThresholdId);
                   }
               }, 1000);
           }
@@ -208,16 +211,14 @@
                   timeBegin = performance.now();
                   timeAlreadyUP = 0;
                   document.getElementById(counterDisplayId).textContent = "00:00:00";
-                  document.body.classList.remove("flashing-orange");
-                  document.body.classList.remove("flashing-red");
+                  disableFlashing();
                   unlockButton(true, true, true,   false, false);
 
                   // Arrêter et réinitialiser le chrono des questions
                   if (questionsIntervalId) {
                       clearInterval(questionsIntervalId);
                       document.getElementById("questionsChrono").textContent = "00:00:00";
-                      document.body.classList.remove("flashing-orange");
-                      document.body.classList.remove("flashing-red");
+                      disableFlashing();
                   }
 
                   // Réinitialiser le chronomètre et le redémarrer
@@ -246,8 +247,7 @@
 
           document.getElementById(stopBtnId).addEventListener('click', () => {
               clearInterval(intervalId);
-              document.body.classList.remove("flashing-orange");
-              document.body.classList.remove("flashing-red");
+              disableFlashing();
 
               if (onStopCallback) {
                   onStopCallback();
@@ -277,18 +277,8 @@
 
                   updateChrono("questionsChrono", counterQuestions);
 
-                  const orangeThreshold = document.getElementById("questionDuree").value * 60;
-                  const redThreshold = orangeThreshold + document.getElementById("questionMargeAutorisee").value * 60;
-
-                  if (counterQuestions === orangeThreshold) {
-                      document.body.classList.remove("flashing-red");
-                      document.body.classList.add("flashing-orange");
-                  }
-
-                  if (counterQuestions === redThreshold) {
-                      document.body.classList.remove("flashing-orange");
-                      document.body.classList.add("flashing-red");
-                  }
+                  // Gestion des alarmes
+                  toggleFlashing(counterQuestions, "questionDuree", "questionMargeAutorisee");
               }
           }, 1000);
 
@@ -312,8 +302,7 @@
 
           document.getElementById("questionsBoutonTerminer").addEventListener('click', () => {
               clearInterval(questionsIntervalId);
-              document.body.classList.remove("flashing-orange");
-              document.body.classList.remove("flashing-red");
+              disableFlashing();
               // Enlever la ligne suivante pour ne pas réinitialiser le chronomètre
               // document.getElementById("questionsChrono").textContent = "00:00:00";
               releaseWakeLock(); // Libérer le verrouillage de l'écran
