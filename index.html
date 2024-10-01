@@ -183,7 +183,6 @@
 
           let timeBegin = 0;
           let timeAlreadyUP = 0;
-          let intervalId;
           let isPaused = false;
           let hasStarted = false;
 
@@ -221,7 +220,6 @@
                   unlockButton(true, true, true,   false, false);
 
                   // Réinitialiser le chronomètre et le redémarrer
-                  if (intervalId) clearInterval(intervalId);
                   startCounter();
               }
           });
@@ -251,7 +249,6 @@
 
               unlockButton(false, false, false,   true, true);
 
-              clearInterval(intervalId);
               disableFlashing();
 
               // Démarrer le chronomètre des questions
@@ -288,7 +285,6 @@
               currentMargeAutorisee = "soutenanceMargeAutorisee";
               isPaused = true;
 
-              clearInterval(questionsIntervalId);
               disableFlashing();
 
               timeBegin = performance.now();
