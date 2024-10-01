@@ -177,6 +177,10 @@
         }
 
       function createCounter(onStopCallback) {
+          let currentChrono = "soutenanceChrono";
+          let currentDuree = "soutenanceDuree";
+          let currentMargeAutorisee = "soutenanceMargeAutorisee";
+
           let timeBegin = 0;
           let timeAlreadyUP = 0;
           let intervalId;
@@ -190,10 +194,10 @@
                       const counter = timeAlreadyUP + Math.floor((timeEnd-timeBegin)/1000);
 
                       // Affichage formaté
-                      updateChrono("soutenanceChrono", counter);
+                      updateChrono(currentChrono, counter);
 
                       // Gestion des alarmes
-                      toggleFlashing(counter, "soutenanceDuree", "soutenanceMargeAutorisee");
+                      toggleFlashing(counter, currentDuree, currentMargeAutorisee);
                   }
               }, 1000);
           }
@@ -207,19 +211,14 @@
                   unlockButton(true, true, true,   false, false);
                   requestWakeLock(); // Demander le verrouillage de l'écran
               } else {
-                  // Réinitialiser le chrono
+                  // Réinitialiser les chronos
                   timeBegin = performance.now();
                   timeAlreadyUP = 0;
                   document.getElementById("soutenanceChrono").textContent = "00:00:00";
+                  document.getElementById("questionsChrono").textContent = "00:00:00";
                   disableFlashing();
+                  isPaused = false;
                   unlockButton(true, true, true,   false, false);
-
-                  // Arrêter et réinitialiser le chrono des questions
-                  if (questionsIntervalId) {
-                      clearInterval(questionsIntervalId);
-                      document.getElementById("questionsChrono").textContent = "00:00:00";
-                      disableFlashing();
-                  }
 
                   // Réinitialiser le chronomètre et le redémarrer
                   if (intervalId) clearInterval(intervalId);
@@ -246,67 +245,63 @@
           });
 
           document.getElementById("soutenanceBoutonQuestions").addEventListener('click', () => {
+              currentChrono = "questionsChrono";
+              currentDuree = "questionDuree";
+              currentMargeAutorisee = "questionMargeAutorisee";
+
+              unlockButton(false, false, false,   true, true);
+
               clearInterval(intervalId);
               disableFlashing();
 
-              if (onStopCallback) {
-                  onStopCallback();
-              }
+              // Démarrer le chronomètre des questions
+              timeBegin = performance.now();
+              timeAlreadyUP = 0;
+              startCounter();
+
               // Ne pas appeler releaseWakeLock ici
           });
-      }
 
-      function soutenanceStartCompteur() {
-          createCounter( () => {
-              // Quand on termine la soutenance, on démarre le compteur des questions
-              // Le compteur des questions est déjà visible
-              unlockButton(false, false, false,   true, true);
-              questionsStartCompteur(); // Démarrer le chronomètre des questions ici
-          });
-      }
-
-      function questionsStartCompteur() {
-          let timeBegin = performance.now();
-          let timeAlreadyUP = 0;
-          isPausedQuestions = false;    // Initialiser l'état de pause des questions
-
-          questionsIntervalId = setInterval(() => {
-              if (!isPausedQuestions) {
-                  const timeEnd = performance.now();
-                  const counterQuestions=timeAlreadyUP + Math.floor((timeEnd-timeBegin)/1000);
-
-                  updateChrono("questionsChrono", counterQuestions);
-
-                  // Gestion des alarmes
-                  toggleFlashing(counterQuestions, "questionDuree", "questionMargeAutorisee");
-              }
-          }, 1000);
+          // Questions
 
           document.getElementById("questionsBoutonPause").addEventListener('click', () => {
-              if( ! isPausedQuestions )
+              if( ! isPaused )
               { // The counter will be stopped
                   const timeEnd = performance.now();
                   timeAlreadyUP = timeAlreadyUP + Math.floor((timeEnd-timeBegin)/1000);
-                  isPausedQuestions = true;
+                  isPaused = true;
                   document.getElementById("questionsBoutonPause").textContent = "Continuer";
                   unlockButton(false, false, false,   true, true);
               }
               else
               { // The counter will be restarted
                   timeBegin = performance.now();
-                  isPausedQuestions = false;
+                  isPaused = false;
                   document.getElementById("questionsBoutonPause").textContent = "Pause";
                   unlockButton(false, false, false,   true, true);
               }
           });
 
           document.getElementById("questionsBoutonTerminer").addEventListener('click', () => {
+              currentChrono = "soutenanceChrono";
+              currentDuree = "soutenanceDuree";
+              currentMargeAutorisee = "soutenanceMargeAutorisee";
+              isPaused = true;
+
               clearInterval(questionsIntervalId);
               disableFlashing();
-              // Enlever la ligne suivante pour ne pas réinitialiser le chronomètre
-              // document.getElementById("questionsChrono").textContent = "00:00:00";
+
+              timeBegin = performance.now();
+              timeAlreadyUP = 0;
+              startCounter();
+
               releaseWakeLock(); // Libérer le verrouillage de l'écran
               unlockButton(true, false, false,   false, false);
+          });
+      }
+
+      function soutenanceStartCompteur() {
+          createCounter( () => {
           });
       }
 
