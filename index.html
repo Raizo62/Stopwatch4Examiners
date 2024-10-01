@@ -186,6 +186,23 @@
           let isPaused = false;
           let hasStarted = false;
 
+          function pauseChrono(idBoutonPause)
+          {
+              if( ! isPaused )
+              { // The counter will be stopped
+                const timeEnd = performance.now();
+                timeAlreadyUP = timeAlreadyUP + Math.floor((timeEnd-timeBegin)/1000);
+                isPaused = true;
+                document.getElementById(idBoutonPause).textContent = "Continuer";
+              }
+              else
+              { // The counter will be restarted
+                timeBegin = performance.now();
+                isPaused = false;
+                document.getElementById(idBoutonPause).textContent = "Pause";
+              }
+          }
+
           function startCounter() {
               intervalId = setInterval(() => {
                   if (!isPaused) {
@@ -225,21 +242,7 @@
           });
 
           document.getElementById("soutenanceBoutonPause").addEventListener('click', () => {
-              if( ! isPaused )
-              { // The counter will be stopped
-                const timeEnd = performance.now();
-                timeAlreadyUP = timeAlreadyUP + Math.floor((timeEnd-timeBegin)/1000);
-                isPaused = true;
-                document.getElementById("soutenanceBoutonPause").textContent = "Continuer";
-                unlockButton(true, true, true,   false, false);
-              }
-              else
-              { // The counter will be restarted
-                timeBegin = performance.now();
-                isPaused = false;
-                document.getElementById("soutenanceBoutonPause").textContent = "Pause";
-                unlockButton(true, true, true,   false, false);
-              }
+              pauseChrono("soutenanceBoutonPause");
           });
 
           document.getElementById("soutenanceBoutonQuestions").addEventListener('click', () => {
@@ -262,21 +265,7 @@
           // Questions
 
           document.getElementById("questionsBoutonPause").addEventListener('click', () => {
-              if( ! isPaused )
-              { // The counter will be stopped
-                  const timeEnd = performance.now();
-                  timeAlreadyUP = timeAlreadyUP + Math.floor((timeEnd-timeBegin)/1000);
-                  isPaused = true;
-                  document.getElementById("questionsBoutonPause").textContent = "Continuer";
-                  unlockButton(false, false, false,   true, true);
-              }
-              else
-              { // The counter will be restarted
-                  timeBegin = performance.now();
-                  isPaused = false;
-                  document.getElementById("questionsBoutonPause").textContent = "Pause";
-                  unlockButton(false, false, false,   true, true);
-              }
+              pauseChrono("questionsBoutonPause");
           });
 
           document.getElementById("questionsBoutonTerminer").addEventListener('click', () => {
