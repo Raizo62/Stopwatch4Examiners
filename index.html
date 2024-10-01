@@ -108,10 +108,10 @@
             <div class="sub-config" id="questionsConfig">
                 <h4>Questions</h4>
                 <label class="config-label">Durée (min) : 
-                <input type="number" id="questionDuree" value="10" min="0">
+                <input type="number" id="questionsDuree" value="10" min="0">
                 </label>
                 <label class="config-label">Marge (min) : 
-                <input type="number" id="questionMargeAutorisee" value="2" min="0">
+                <input type="number" id="questionsMargeAutorisee" value="2" min="0">
                 </label>
             </div>
         </div>
@@ -244,8 +244,8 @@
 
           document.getElementById("soutenanceBoutonQuestions").addEventListener('click', () => {
               currentChrono = "questionsChrono";
-              currentDuree = "questionDuree";
-              currentMargeAutorisee = "questionMargeAutorisee";
+              currentDuree = "questionsDuree";
+              currentMargeAutorisee = "questionsMargeAutorisee";
 
               unlockButton(false, false, false,   true, true);
 
