@@ -176,7 +176,7 @@
           }
         }
 
-      function createCounter(counterDisplayId, startBtnId, pauseBtnId, stopBtnId, alarmId, thresholdId, onStopCallback) {
+      function createCounter(onStopCallback) {
           let timeBegin = 0;
           let timeAlreadyUP = 0;
           let intervalId;
@@ -190,27 +190,27 @@
                       const counter = timeAlreadyUP + Math.floor((timeEnd-timeBegin)/1000);
 
                       // Affichage formaté
-                      updateChrono(counterDisplayId, counter);
+                      updateChrono("soutenanceChrono", counter);
 
                       // Gestion des alarmes
-                      toggleFlashing(counter, alarmId, thresholdId);
+                      toggleFlashing(counter, "soutenanceDuree", "soutenanceMargeAutorisee");
                   }
               }, 1000);
           }
 
-          document.getElementById(startBtnId).addEventListener('click', () => {
+          document.getElementById("soutenanceBoutonStart").addEventListener('click', () => {
               if (!hasStarted) {
                   hasStarted = true;
                   timeBegin = performance.now();
                   startCounter();
-                  document.getElementById(startBtnId).textContent = "Reinit";
+                  document.getElementById("soutenanceBoutonStart").textContent = "Reinit";
                   unlockButton(true, true, true,   false, false);
                   requestWakeLock(); // Demander le verrouillage de l'écran
               } else {
                   // Réinitialiser le chrono
                   timeBegin = performance.now();
                   timeAlreadyUP = 0;
-                  document.getElementById(counterDisplayId).textContent = "00:00:00";
+                  document.getElementById("soutenanceChrono").textContent = "00:00:00";
                   disableFlashing();
                   unlockButton(true, true, true,   false, false);
 
@@ -227,25 +227,25 @@
               }
           });
 
-          document.getElementById(pauseBtnId).addEventListener('click', () => {
+          document.getElementById("soutenanceBoutonPause").addEventListener('click', () => {
               if( ! isPaused )
               { // The counter will be stopped
                 const timeEnd = performance.now();
                 timeAlreadyUP = timeAlreadyUP + Math.floor((timeEnd-timeBegin)/1000);
                 isPaused = true;
-                document.getElementById(pauseBtnId).textContent = "Continuer";
+                document.getElementById("soutenanceBoutonPause").textContent = "Continuer";
                 unlockButton(true, true, true,   false, false);
               }
               else
               { // The counter will be restarted
                 timeBegin = performance.now();
                 isPaused = false;
-                document.getElementById(pauseBtnId).textContent = "Pause";
+                document.getElementById("soutenanceBoutonPause").textContent = "Pause";
                 unlockButton(true, true, true,   false, false);
               }
           });
 
-          document.getElementById(stopBtnId).addEventListener('click', () => {
+          document.getElementById("soutenanceBoutonQuestions").addEventListener('click', () => {
               clearInterval(intervalId);
               disableFlashing();
 
@@ -257,7 +257,7 @@
       }
 
       function soutenanceStartCompteur() {
-          createCounter("soutenanceChrono", "soutenanceBoutonStart", "soutenanceBoutonPause", "soutenanceBoutonQuestions", "soutenanceDuree", "soutenanceMargeAutorisee", () => {
+          createCounter( () => {
               // Quand on termine la soutenance, on démarre le compteur des questions
               // Le compteur des questions est déjà visible
               unlockButton(false, false, false,   true, true);
