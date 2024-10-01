@@ -176,7 +176,7 @@
           }
         }
 
-      function createCounter(counterId, counterDisplayId, startBtnId, pauseBtnId, stopBtnId, alarmId, thresholdId, onStopCallback) {
+      function createCounter(counterDisplayId, startBtnId, pauseBtnId, stopBtnId, alarmId, thresholdId, onStopCallback) {
           let timeBegin = 0;
           let timeAlreadyUP = 0;
           let intervalId;
@@ -257,7 +257,7 @@
       }
 
       function soutenanceStartCompteur() {
-          createCounter("soutenanceCompteur", "soutenanceChrono", "soutenanceBoutonStart", "soutenanceBoutonPause", "soutenanceBoutonQuestions", "soutenanceDuree", "soutenanceMargeAutorisee", () => {
+          createCounter("soutenanceChrono", "soutenanceBoutonStart", "soutenanceBoutonPause", "soutenanceBoutonQuestions", "soutenanceDuree", "soutenanceMargeAutorisee", () => {
               // Quand on termine la soutenance, on démarre le compteur des questions
               // Le compteur des questions est déjà visible
               unlockButton(false, false, false,   true, true);
