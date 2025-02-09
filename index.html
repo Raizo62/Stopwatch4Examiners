@@ -262,7 +262,9 @@
               if (!hasStarted) {
                   // click on the button "Start"
                   hasStarted = true;
+                  isPaused = false;
                   timeBegin = performance.now();
+                  timeAlreadyUP = 0;
                   startCounter();
                   document.getElementById("soutenanceBoutonStart").textContent = "Reinit";
                   unlockButton(true, true, true,   false, false);
