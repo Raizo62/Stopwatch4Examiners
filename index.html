@@ -260,6 +260,7 @@
 
           document.getElementById("soutenanceBoutonStart").addEventListener('click', () => {
               if (!hasStarted) {
+                  // click on the button "Start"
                   hasStarted = true;
                   timeBegin = performance.now();
                   startCounter();
@@ -267,14 +268,18 @@
                   unlockButton(true, true, true,   false, false);
                   requestWakeLock(); // Demander le verrouillage de l'écran
               } else {
+                  // click on the button "Reinit"
                   // Réinitialiser les chronos
                   timeBegin = performance.now();
                   timeAlreadyUP = 0;
+                  document.getElementById("soutenanceBoutonStart").textContent = "Start";
+                  document.getElementById("soutenanceBoutonPause").textContent = "Pause";
                   document.getElementById("soutenanceChrono").textContent = "00:00:00";
                   document.getElementById("questionsChrono").textContent = "00:00:00";
                   disableFlashing();
-                  isPaused = false;
-                  unlockButton(true, true, true,   false, false);
+                  isPaused = true;
+                  hasStarted = false;
+                  unlockButton(true, false, false,   false, false);
 
                   // Réinitialiser le chronomètre et le redémarrer
                   startCounter();
