@@ -159,6 +159,12 @@
                 </label>
             </div>
         </div>
+        <div id="history" class="cadre">
+            <h3>Historique</h3>
+            <div id="historyList" class="container">
+                <!-- The times for defense and questions will be added here -->
+            </div>
+        </div>
     </div>
     <script>
       let questionsIntervalId;    // Variable pour suivre l'intervalle du chronomètre des questions
@@ -216,6 +222,13 @@
               document.body.classList.add("flashing-orange");
           }
         }
+
+      function addHistoryEntry(type, time) {
+          const historyList = document.getElementById("historyList");
+          const entry = document.createElement("div");
+          entry.textContent = `${type}: ${time}`;
+          historyList.insertBefore(entry, historyList.firstChild);
+      }
 
       function createCounter(onStopCallback) {
           let currentChrono = "soutenanceChrono";
@@ -296,6 +309,8 @@
           });
 
           document.getElementById("soutenanceBoutonQuestions").addEventListener('click', () => {
+              addHistoryEntry("Soutenance", document.getElementById("soutenanceChrono").textContent);
+
               currentChrono = "questionsChrono";
               currentDuree = "questionsDuree";
               currentMargeAutorisee = "questionsMargeAutorisee";
@@ -332,6 +347,7 @@
 
               releaseWakeLock(); // Libérer le verrouillage de l'écran
               unlockButton(true, false, false,   false, false);
+              addHistoryEntry("Questions", document.getElementById("questionsChrono").textContent);
           });
       }
 
